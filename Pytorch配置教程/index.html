@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.arthasjian.online","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Anaconda+CUDA+Pytorch全流程详解">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2024年Pytorch + CUDA配置教程（Windows版）">
+<meta property="og:url" content="http://blog.arthasjian.online/Pytorch%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/">
+<meta property="og:site_name" content="ArthasJian&#39;s Blog">
+<meta property="og:description" content="Anaconda+CUDA+Pytorch全流程详解">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://blog.arthasjian.online/images/Pytorch%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/image-0.png">
+<meta property="og:image" content="http://blog.arthasjian.online/images/Pytorch%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/image-1.png">
+<meta property="og:image" content="http://blog.arthasjian.online/images/Pytorch%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/image-2.png">
+<meta property="og:image" content="http://blog.arthasjian.online/images/Pytorch%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/image-3.png">
+<meta property="article:published_time" content="2024-06-24T02:36:03.319Z">
+<meta property="article:modified_time" content="2024-06-24T05:47:25.562Z">
+<meta property="article:author" content="ArthasJian">
+<meta property="article:tag" content="pytorch">
+<meta property="article:tag" content="CUDA">
+<meta property="article:tag" content="anaconda">
+<meta property="article:tag" content="python">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://blog.arthasjian.online/images/Pytorch%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/image-0.png">
+
+<link rel="canonical" href="http://blog.arthasjian.online/Pytorch%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>2024年Pytorch + CUDA配置教程（Windows版） | ArthasJian's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2058268027180937"
+     crossorigin="anonymous"></script>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">ArthasJian's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Getting better</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-文章">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>文章</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.arthasjian.online/Pytorch%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="ArthasJian">
+      <meta itemprop="description" content="Python萌新之家">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ArthasJian's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          2024年Pytorch + CUDA配置教程（Windows版）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-06-24 10:36:03 / 修改时间：13:47:25" itemprop="dateCreated datePublished" datetime="2024-06-24T10:36:03+08:00">2024-06-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%99%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">教程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%99%E7%A8%8B/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">Anaconda+CUDA+Pytorch全流程详解</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="Step-1-GPU驱动安装——版本越新越好"><a href="#Step-1-GPU驱动安装——版本越新越好" class="headerlink" title="[Step 1] GPU驱动安装——版本越新越好"></a>[Step 1] GPU驱动安装——版本越新越好</h2><p>Windows系统的显卡驱动应该很好装，全是图形化窗口，显卡驱动的下载网站是：<a target="_blank" rel="noopener" href="https://www.nvidia.cn/geforce/drivers/">英伟达显卡驱动查找地址</a></p>
+<p><img src="/images/Pytorch%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/image-0.png" alt="alt text"></p>
+<p>在这里选择你的显卡并点击“开始搜索”查找驱动，并在下方下载名为GeForce Game Ready驱动程序的驱动即可，其余安装过程直接一直下一步就可以安装完成了。</p>
+<p><img src="/images/Pytorch%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/image-1.png" alt="alt text"></p>
+<h2 id="Step-2-决定Pytorch版本——要在装CUDA之前就确定好"><a href="#Step-2-决定Pytorch版本——要在装CUDA之前就确定好" class="headerlink" title="[Step 2] 决定Pytorch版本——要在装CUDA之前就确定好"></a>[Step 2] 决定Pytorch版本——要在装CUDA之前就确定好</h2><p>此步骤非常关键，这也是很多人装了卸载，然后再装再卸多次都不能成功的原因之一。</p>
+<p>打开这个网页查看pytorch官网支持的两各版本CUDA：<a target="_blank" rel="noopener" href="https://pytorch.org/get-started/locally/">Pytorch下载链接</a></p>
+<p><img src="/images/Pytorch%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/image-2.png" alt="alt text"></p>
+<p>截至2024年6月22日，官网支持11.8和12.1两个版本的CUDA，因此我们只需要根据一会安装的CUDA来选择安装pytorch的命令即可</p>
+<h2 id="Step-3-CUDA安装及环境变量配置"><a href="#Step-3-CUDA安装及环境变量配置" class="headerlink" title="[Step 3] CUDA安装及环境变量配置"></a>[Step 3] CUDA安装及环境变量配置</h2><p>此步骤前提为安装好GPU驱动，若驱动没有安装好，请移步[Step 1]。</p>
+<p>首先进入cmd命令行，输入如下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvidia-smi</span><br></pre></td></tr></table></figure>
+
+<p>命令行输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">+-----------------------------------------------------------------------------------------+</span><br><span class="line">| NVIDIA-SMI 555.42.02              Driver Version: 555.42.02      CUDA Version: 12.5     |</span><br><span class="line">|-----------------------------------------+------------------------+----------------------+</span><br><span class="line">| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |</span><br><span class="line">| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |</span><br><span class="line">|                                         |                        |               MIG M. |</span><br><span class="line">|=========================================+========================+======================|</span><br><span class="line">|   0  NVIDIA GeForce RTX 4080        Off |   00000000:01:00.0  On |                  N/A |</span><br><span class="line">|  0%   49C    P0             60W /  320W |    1209MiB /  16376MiB |      5%      Default |</span><br><span class="line">|                                         |                        |                  N/A |</span><br><span class="line">+-----------------------------------------+------------------------+----------------------+</span><br><span class="line">                                                                                         </span><br><span class="line">等等......</span><br></pre></td></tr></table></figure>
+
+<p>其中， <code>Driver Version: </code>后面是驱动版本，这个当然越高越好，越高的版本有可能支持更高的CUDA版本；<code>CUDA Version: </code>后面是支持的最高CUDA版本。也就是说本机安装的CUDA版本不能高于此版本。</p>
+<p>最高CUDA版本为<code>11.x</code>的不可以安装12.1版本CUDA所支持的pytorch；</p>
+<p>最高CUDA版本为<code>12.x</code>的可以选择安装任意一种pytorch，语法没有差别。</p>
+<p>以本机为例，CUDA版本不能高于12.5，也就是说我可以选择安装12.1版本的pytorch</p>
+<p>接下来我们来到<a target="_blank" rel="noopener" href="https://developer.nvidia.com/cuda-toolkit-archive">CUDA Release</a>下载安装CUDA工具包（CUDA Toolkit）</p>
+<p>CUDA版本号<code>a.b.c</code>三个位置中，<code>a</code>必须与pytorch对应的CUDA版本相同，<code>b</code>必须高于pytorch对应的CUDA版本，如我想要下载12.1CUDA对应的pytorch，我可以下载12.4版本的CUDA甚至最新版（12.5）CUDA。</p>
+<p>下载完成后，安装还是一直下一步，不需要更改安装位置，只需要默认即可。</p>
+<p>CUDA会默认安装到<code>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\&#123;版本号&#125;</code>中。</p>
+<p>此时打开命令行并输入</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nvcc -V</span><br></pre></td></tr></table></figure>
+<p>来检查CUDA安装是否成功，并查看CUDA版本号。</p>
+<p>若安装成功，则命令行输出类似信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">nvcc: NVIDIA (R) Cuda compiler driver</span><br><span class="line">Copyright (c) 2005-2024 NVIDIA Corporation</span><br><span class="line">Built on Thu_Mar_28_02:18:24_PDT_2024</span><br><span class="line">Cuda compilation tools, release 12.4, V12.4.131</span><br><span class="line">Build cuda_12.4.r12.4/compiler.34097967_0</span><br></pre></td></tr></table></figure>
+
+<p>否则找不到nvcc命令。</p>
+<p><em>若安装失败，原因有可能是nvcc目录没有在环境变量中，在此提供一个解决办法：</em></p>
+<ol>
+<li>进入“编辑系统环境变量”</li>
+<li>添加环境变量<code>CUDA_HOME</code>，值为<code>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\&#123;版本号&#125;</code></li>
+<li>修改<code>Path</code>变量，在后面追加<code>%CUDA_HOME%\bin</code></li>
+<li>一路确定</li>
+<li>重新打开命令行窗口</li>
+<li>输入<code>nvcc -V</code>，成功查看上述消息</li>
+</ol>
+<p>至此，CUDA安装成功！</p>
+<h2 id="Step-4-Anaconda安装及环境变量配置"><a href="#Step-4-Anaconda安装及环境变量配置" class="headerlink" title="[Step 4] Anaconda安装及环境变量配置"></a>[Step 4] Anaconda安装及环境变量配置</h2><p>Anaconda拥有强大的包管理器和较简单的虚拟环境配置过程。可以说，学习数据处理或者人工智能，这个Anaconda是必备的软件之一。因此这部分不了解的就别跳过啦，好好看完吧！</p>
+<p><a target="_blank" rel="noopener" href="https://www.anaconda.com/download/success">Anaconda官网</a></p>
+<h3 id="Anaconda安装"><a href="#Anaconda安装" class="headerlink" title="Anaconda安装"></a>Anaconda安装</h3><p>进入上述官网进行Anaconda下载，选择Windows平台下载，并进入安装。</p>
+<p>安装位置可以选择空间较大的盘，因为以后可能会创建多个虚拟环境。默认的安装位置为<code>C:\ProgramData\anaconda3</code>，为了方便记忆，我只改变盘符而不改变其他路径，我将其修改为<code>D:\ProgramData\anaconda3</code></p>
+<p>这一步骤全选：</p>
+<p><img src="/images/Pytorch%E9%85%8D%E7%BD%AE%E6%95%99%E7%A8%8B/image-3.png" alt="alt text"></p>
+<p>然后点击<code>Install</code>开始安装，等待安装完成。（可能需要一定的时间）</p>
+<h3 id="添加CONDA环境变量"><a href="#添加CONDA环境变量" class="headerlink" title="添加CONDA环境变量"></a>添加CONDA环境变量</h3><p>安装之后需要主动将conda执行文件配置到环境变量中：</p>
+<ol>
+<li><p>首先创建环境变量<code>CONDA_HOME</code>，值为<code>&#123;anaconda3文件夹位置&#125;</code>，例如，在本人的例子中为<code>D:\ProgramData\anaconda3</code>。</p>
+</li>
+<li><p>然后在Path变量中追加以下五条内容：</p>
+<p> <code>%CONDA_HOME%</code></p>
+<p> <code>%CONDA_HOME%\Library\bin</code></p>
+<p> <code>%CONDA_HOME%\Library\usr\bin</code></p>
+<p> <code>%CONDA_HOME%\Library\mingw-w64\bin</code></p>
+<p> <code>%CONDA_HOME%\Scripts</code></p>
+</li>
+<li><p>添加完毕后新打开一个命令行窗口输入<code>conda --version</code>来测试conda是否可用。</p>
+</li>
+<li><p>初始化conda命令：</p>
+<p> 依次输入以下两条命令：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda init</span><br><span class="line">conda init cmd.exe</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>至此，conda配置成功</p>
+<h2 id="Step-5-新建Python虚拟环境"><a href="#Step-5-新建Python虚拟环境" class="headerlink" title="[Step 5] 新建Python虚拟环境"></a>[Step 5] 新建Python虚拟环境</h2><p>此步骤使用conda创建虚拟环境</p>
+<h3 id="conda换源"><a href="#conda换源" class="headerlink" title="conda换源&lt;可选步骤&gt;"></a>conda换源&lt;可选步骤&gt;</h3><p><em>若不能使用魔法从官方库下载，或连接十分缓慢，可选择此步骤。此步骤将conda源换为清华源</em></p>
+<ol>
+<li><p>执行<code>conda config --set show_channel_urls yes</code>生成<code>.condarc</code>文件之后进行修改。<code>.condarc</code>文件生成于<code>C:\Users\&#123;电脑用户名&#125;</code>文件夹下。</p>
+</li>
+<li><p>打开此文件后将其修改为如下内容并保存：</p>
+</li>
+</ol>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">channels:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">defaults</span></span><br><span class="line"><span class="attr">show_channel_urls:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">default_channels:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/r</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/msys2</span></span><br><span class="line"><span class="attr">custom_channels:</span></span><br><span class="line">  <span class="attr">conda-forge:</span> <span class="string">https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud</span></span><br><span class="line">  <span class="attr">msys2:</span> <span class="string">https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud</span></span><br><span class="line">  <span class="attr">bioconda:</span> <span class="string">https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud</span></span><br><span class="line">  <span class="attr">menpo:</span> <span class="string">https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud</span></span><br><span class="line">  <span class="attr">pytorch:</span> <span class="string">https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud</span></span><br><span class="line">  <span class="attr">pytorch-lts:</span> <span class="string">https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud</span></span><br><span class="line">  <span class="attr">simpleitk:</span> <span class="string">https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud</span></span><br><span class="line">  <span class="attr">deepmodeling:</span> <span class="string">https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/</span></span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>运行<code>conda clean -i</code>，清空索引缓存，确保使用的是清华源</li>
+</ol>
+<h3 id="创建适合于pytorch的虚拟环境"><a href="#创建适合于pytorch的虚拟环境" class="headerlink" title="创建适合于pytorch的虚拟环境"></a>创建适合于pytorch的虚拟环境</h3><ol>
+<li><p>我们新建一个虚拟环境，使用如下命令创建（命令中<code>&#123;虚拟环境名&#125;</code>替换为你想创建的名字，使用英文）：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda create -n &#123;虚拟环境名&#125; python=3.9 matplotlib numpy pandas jupyter</span><br></pre></td></tr></table></figure>
+
+<p> 我们新建一个python版本为3.9的虚拟环境，初始化安装了matplotlib, numpy, pandas库，以避免后续依次安装而造成的依赖版本冲突问题。</p>
+<p> Tips: 经验得出的结论，这样安装的python包会自动协调版本内容，避免冲突。所以尽可能在创建时一次安装完成。但有些python包比较大，下载如果过慢会导致创建时间随之延长。</p>
+<p> 等环境创建完毕后进入此虚拟环境，命令为：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda activate &#123;虚拟环境名&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>新建完虚拟环境后，就可以正式安装pytorch了。</p>
+<p> 我们回到<a target="_blank" rel="noopener" href="https://pytorch.org/get-started/locally/">pytorch的官网</a></p>
+<p> 选择<code>Stable</code>的build版本，<code>Windows</code>平台，<code>Conda</code>包管理器，<code>Python</code>语言和与自己安装的CUDA版本兼容的CUDA</p>
+<p> 复制下面的安装指令，以我的电脑为例，大概长这个样子：</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>经过漫长的等待之后，pytorch安装成功</p>
+</li>
+</ol>
+<h3 id="测试GPU是否可用"><a href="#测试GPU是否可用" class="headerlink" title="测试GPU是否可用"></a>测试GPU是否可用</h3><ol>
+<li><p>在本虚拟环境中，使用<code>python</code>命令进入python控制台</p>
+</li>
+<li><p>导入pytorch包，并验证cuda是否可用</p>
+</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> torch</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>torch.cuda.is_available()</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>python控制台输出<code>True</code>，则GPU可用，环境安装完毕</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>支持一下吧。或者如果有问题可以加我咨询！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="ArthasJian 微信">
+        <p>微信</p>
+      </div>
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="ArthasJian 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/pytorch/" rel="tag"># pytorch</a>
+              <a href="/tags/CUDA/" rel="tag"># CUDA</a>
+              <a href="/tags/anaconda/" rel="tag"># anaconda</a>
+              <a href="/tags/python/" rel="tag"># python</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/Anaconda+Pytorch%EF%BC%88GPU%EF%BC%89%E9%85%8D%E7%BD%AE%E8%AF%A6%E8%A7%A3/" rel="prev" title="深度学习Pytorch框架全套配置教程">
+      <i class="fa fa-chevron-left"></i> 深度学习Pytorch框架全套配置教程
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-1-GPU%E9%A9%B1%E5%8A%A8%E5%AE%89%E8%A3%85%E2%80%94%E2%80%94%E7%89%88%E6%9C%AC%E8%B6%8A%E6%96%B0%E8%B6%8A%E5%A5%BD"><span class="nav-number">1.</span> <span class="nav-text">[Step 1] GPU驱动安装——版本越新越好</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-2-%E5%86%B3%E5%AE%9APytorch%E7%89%88%E6%9C%AC%E2%80%94%E2%80%94%E8%A6%81%E5%9C%A8%E8%A3%85CUDA%E4%B9%8B%E5%89%8D%E5%B0%B1%E7%A1%AE%E5%AE%9A%E5%A5%BD"><span class="nav-number">2.</span> <span class="nav-text">[Step 2] 决定Pytorch版本——要在装CUDA之前就确定好</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-3-CUDA%E5%AE%89%E8%A3%85%E5%8F%8A%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E9%85%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">[Step 3] CUDA安装及环境变量配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-4-Anaconda%E5%AE%89%E8%A3%85%E5%8F%8A%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E9%85%8D%E7%BD%AE"><span class="nav-number">4.</span> <span class="nav-text">[Step 4] Anaconda安装及环境变量配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Anaconda%E5%AE%89%E8%A3%85"><span class="nav-number">4.1.</span> <span class="nav-text">Anaconda安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0CONDA%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="nav-number">4.2.</span> <span class="nav-text">添加CONDA环境变量</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-5-%E6%96%B0%E5%BB%BAPython%E8%99%9A%E6%8B%9F%E7%8E%AF%E5%A2%83"><span class="nav-number">5.</span> <span class="nav-text">[Step 5] 新建Python虚拟环境</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#conda%E6%8D%A2%E6%BA%90"><span class="nav-number">5.1.</span> <span class="nav-text">conda换源&lt;可选步骤&gt;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E9%80%82%E5%90%88%E4%BA%8Epytorch%E7%9A%84%E8%99%9A%E6%8B%9F%E7%8E%AF%E5%A2%83"><span class="nav-number">5.2.</span> <span class="nav-text">创建适合于pytorch的虚拟环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95GPU%E6%98%AF%E5%90%A6%E5%8F%AF%E7%94%A8"><span class="nav-number">5.3.</span> <span class="nav-text">测试GPU是否可用</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">ArthasJian</p>
+  <div class="site-description" itemprop="description">Python萌新之家</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/MasterZZJ" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;MasterZZJ" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zhuzhijian010409@163.com" title="E-Mail → mailto:zhuzhijian010409@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="Weixin://contacts/profile/MasterZZJ_" title="WeChat → Weixin:&#x2F;&#x2F;contacts&#x2F;profile&#x2F;MasterZZJ_" rel="noopener" target="_blank"><i class="fa fa-fw fa-wechat"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="tencent://message/?uin=1295159251" title="QQ → tencent:&#x2F;&#x2F;message&#x2F;?uin&#x3D;1295159251" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>QQ</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="http://www.beian.miit.gov.cn/" rel="noopener" target="_blank">null </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zhijian Zhu</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
